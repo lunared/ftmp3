@@ -72,7 +72,30 @@
         <div class="container">
             <h2>{{path}}</h2>
             <audio controls></audio>
-
+            
+            <fieldset id="controls">
+                <legend>Controls</legend>
+                <label>
+                    <input type="checkbox" name="autoplay" onclick="toggleControls()" checked/> 
+                    Autoplay
+                </label>
+                <label>
+                    <input type="checkbox" name="shuffle" onclick="toggleShuffle()"/> 
+                    Shuffle
+                </label>
+                <label>
+                    <input type="radio" name="repeat" value="one"/> 
+                    Repeat 1
+                </label>
+                <label>
+                    <input type="radio" name="repeat" value="all" checked/> 
+                    Repeat All
+                </label>
+                <label>
+                    <input type="radio" name="repeat" value="no"/> 
+                    Once
+                </label>                
+            </fieldset>
             <table id="songs">
                 <thead>
                     <th width="30"></th>
@@ -106,18 +129,83 @@
         </div>
         <script>
             var songs = document.getElementsByClassName("song");
+            var shuffleList = [];
             var player = document.getElementsByTagName("audio")[0];
             player.addEventListener('ended', playNext);
 
+            var controls = document.getElementById("controls");
+            var shuffle = controls.elements["shuffle"];
+            var repeat = controls.elements["repeat"];
+            var autoplay = controls.elements["autoplay"];
+
+            /**
+             * Disables all controls if autoplay is turned off
+             */
+            function toggleControls() {
+                shuffle.disabled = !autoplay.checked;
+                for (var r of repeat) {
+                    r.disabled = !autoplay.checked;
+                }
+            }
+
+            /**
+             * Resets the shuffle counter
+             */
+            function toggleShuffle() {
+                shuffleList = Array.prototype.slice.call(songs);
+            }
+
+            /**
+             * Get a song from the list that hasn't been played yet this cycle
+             * pops the song by index from the shuffle and returns a new one
+             */
+            function smartShuffle(index) {
+                shuffleList.pop(index);
+                
+                if (shuffleList.length == 0 && repeat.value == "all") {
+                    toggleShuffle();
+                } else if (shuffleList.length > 0) {
+                    return shuffleList[Math.floor(Math.random() * shuffleList.length)];
+                }
+                return null;
+            }
+
+            /**
+             * Plays the next track.  Invoked when a song is over and autoplay is enabled
+             */
             function playNext() {
-                if (player.src) {
+                if (player.src && autoplay.checked) {
                     var activeSong = document.getElementsByClassName("song playing")[0];
-                    var nextSong = songs[(Array.prototype.indexOf.call(songs, activeSong) + 1) % songs.length];
+                    var active = Array.prototype.indexOf.call(songs, activeSong);
+                    var nextSong;
+                    if (repeat.value == "one") {
+                        nextSong = songs[active];
+                    }
+                    else if (!shuffle.checked) {
+                        var next = active + 1;
+                        if (repeat.value == "all") {
+                            next %= songs.length;
+                        }
+                        else if (next > songs.length) {
+                            return;
+                        }
+                        nextSong = songs[next];
+                    }
+                    else {
+                        nextSong = smartShuffle(active);
+                    }
                     playTrack(nextSong);
                 }
             }
             
+            /**
+             * Plays a track
+             */
             function playTrack(song) {
+                if (song == null) {
+                    return;
+                }
+
                 player.src = window.location + song.getAttribute('data-url');
                 for (var s of songs) {
                     s.classList.remove("playing");
