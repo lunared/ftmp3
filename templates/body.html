@@ -68,6 +68,17 @@
             fieldset {
                 margin: .5em 0;
             }
+
+            @media (max-width: 600px) {
+                .hide-on-small {
+                    display: none;
+                }
+            }
+            @media (min-width: 600px) {
+                .hide-on-large {
+                    display: none;
+                }
+            }
         </style>
 
     </head>
@@ -87,6 +98,7 @@
                     <input type="checkbox" name="shuffle" onclick="toggleShuffle()"/> 
                     Shuffle
                 </label>
+                <br class="hide-on-large">
                 <label>
                     <input type="radio" name="repeat" value="one"/> 
                     Repeat 1
@@ -104,9 +116,9 @@
                 <thead>
                     <th width="30"></th>
                     <th width="40">Track</th>
-                    <th width="170">Artist</th>
+                    <th class="hide-on-small" width="170">Artist</th>
                     <th>Title</th>
-                    <th>Album</th>
+                    <th class="hide-on-small">Album</th>
                     <th width="50">Length</th>
                 </thead>
                 <tbody>
@@ -121,9 +133,9 @@
                         >
                         <td></td>
                         <td>{{song.track}}</td>
-                        <td>{{song.artist}}</td>
+                        <td class="hide-on-small">{{song.artist}}</td>
                         <td>{{song.title}}</td>
-                        <td>{{song.album}}</td>
+                        <td class="hide-on-small">{{song.album}}</td>
                         <td class="right">{{song.length}}</td>
                     </tr>
                     {% endfor %}
