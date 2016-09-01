@@ -107,9 +107,17 @@
         <script>
             var songs = document.getElementsByClassName("song");
             var player = document.getElementsByTagName("audio")[0];
+            player.addEventListener('ended', playNext);
+
+            function playNext() {
+                if (player.src) {
+                    var activeSong = document.getElementsByClassName("song playing")[0];
+                    var nextSong = songs[(Array.prototype.indexOf.call(songs, activeSong) + 1) % songs.length];
+                    playTrack(nextSong);
+                }
+            }
             
             function playTrack(song) {
-                console.log(song);
                 player.src = window.location + song.getAttribute('data-url');
                 for (var s of songs) {
                     s.classList.remove("playing");
