@@ -1,15 +1,12 @@
 <html>
     <head>
-        <link href="https://fonts.googleapis.com/css?family=PT+Sans+Narrow|Dosis" rel="stylesheet">
-
         <style>
             html, body {
                 padding: 0;
                 margin: 0;
                 background: black;
                 color: white;
-                min-height: 100vh;
-                width: 100vw;
+                font-family: monospace;
             }
             .container {
                 width: 100%;
@@ -26,13 +23,18 @@
             table {
                 margin-top: 2rem;
                 width: 100%;
+                table-layout: fixed;
             }
 
             table thead th {
                 border: none;
                 margin: 0;
                 border-bottom: 1px solid white;
-                font-family: 'Dosis';
+                font-family: monospace;
+            }
+
+            table tbody tr:hover {
+                cursor: pointer;
             }
             
             table tbody tr:nth-child(even) {
@@ -50,20 +52,21 @@
                 opacity: 1;
             }
             table tbody tr td:not(:first-child) {
-                font-family: 'PT Sans Narrow';
+                font-family: monospace;
             }
             table tbody tr td,
             table thead th {
                 padding: .2em .5em;
                 text-overflow: ellipsis;
                 white-space: nowrap;
+                overflow: hidden;
             }
 
-            h2 {
-                font-family: 'Dosis';
-            }
             .right {
                 text-align: right;
+            }
+            fieldset {
+                margin: .5em 0;
             }
         </style>
 
@@ -71,6 +74,7 @@
     <body>
         <div class="container">
             <h2>{{path}}</h2>
+            <h3 id="nowplaying">Now playing: <span>---</span></h3>
             <audio controls></audio>
             
             <fieldset id="controls">
@@ -99,11 +103,11 @@
             <table id="songs">
                 <thead>
                     <th width="30"></th>
-                    <th>Track #</th>
-                    <th>Artist</th>
+                    <th width="35">Track #</th>
+                    <th width="170">Artist</th>
                     <th>Title</th>
                     <th>Album</th>
-                    <th>Length</th>
+                    <th width="50">Length</th>
                 </thead>
                 <tbody>
                     {% for song in songs %}
@@ -131,6 +135,7 @@
             var songs = document.getElementsByClassName("song");
             var shuffleList = [];
             var player = document.getElementsByTagName("audio")[0];
+            var nowplaying = document.getElementById("nowplaying");
             player.addEventListener('ended', playNext);
 
             var controls = document.getElementById("controls");
@@ -213,6 +218,8 @@
                 song.classList.add("playing");
                 player.load();
                 player.play();
+
+                nowplaying.children[0].innerHTML = song.getAttribute('data-title');
             }
         </script>
     </body>
