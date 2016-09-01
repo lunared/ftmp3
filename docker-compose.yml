@@ -1,0 +1,9 @@
+version: '2'
+services:
+  site:
+    build: .
+    ports:
+     - "80:5000"
+    volumes:
+     - ./:/var/www:ro
+     - ./music:/media/Music

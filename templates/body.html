@@ -1,0 +1,123 @@
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/css?family=PT+Sans+Narrow|Dosis" rel="stylesheet">
+
+        <style>
+            html, body {
+                padding: 0;
+                margin: 0;
+                background: black;
+                color: white;
+                min-height: 100vh;
+                width: 100vw;
+            }
+            .container {
+                width: 100%;
+                max-width: 960px;
+                margin: auto;
+                box-sizing: border-box;
+                padding: 0.83em;
+            }
+
+            audio {
+                width: 100%;
+            }
+
+            table {
+                margin-top: 2rem;
+                width: 100%;
+            }
+
+            table thead th {
+                border: none;
+                margin: 0;
+                border-bottom: 1px solid white;
+                font-family: 'Dosis';
+            }
+            
+            table tbody tr:nth-child(even) {
+                background: rgba(255,255,255,.2);
+            }
+
+            table tbody tr td:first-child::after {
+                content: ">>";
+                color: white;
+                opacity: 0;
+                transition: opacity .1s linear;
+            }
+            table tbody tr.playing td:first-child::after {
+                content: ">>";
+                opacity: 1;
+            }
+            table tbody tr td:not(:first-child) {
+                font-family: 'PT Sans Narrow';
+            }
+            table tbody tr td,
+            table thead th {
+                padding: .2em .5em;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            h2 {
+                font-family: 'Dosis';
+            }
+            .right {
+                text-align: right;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div class="container">
+            <h2>{{path}}</h2>
+            <audio controls></audio>
+
+            <table id="songs">
+                <thead>
+                    <th width="30"></th>
+                    <th>Track #</th>
+                    <th>Artist</th>
+                    <th>Title</th>
+                    <th>Album</th>
+                    <th>Length</th>
+                </thead>
+                <tbody>
+                    {% for song in songs %}
+                    <tr data-url="{{song.path}}" class="song"
+                        {% if song.track %}
+                        data-title="{{song.track}}. {{song.artist}} - {{song.title}}"
+                        {% else %}
+                        data-title="{{song.artist}} - {{song.title}}"
+                        {% endif %}
+                        onclick="playTrack(this)"
+                        >
+                        <td></td>
+                        <td>{{song.track}}</td>
+                        <td>{{song.artist}}</td>
+                        <td>{{song.title}}</td>
+                        <td>{{song.album}}</td>
+                        <td class="right">{{song.length}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h6 class="right">Powered by ftmp3</h6>
+        </div>
+        <script>
+            var songs = document.getElementsByClassName("song");
+            var player = document.getElementsByTagName("audio")[0];
+            
+            function playTrack(song) {
+                console.log(song);
+                player.src = window.location + song.getAttribute('data-url');
+                for (var s of songs) {
+                    s.classList.remove("playing");
+                }
+                song.classList.add("playing");
+                player.load();
+                player.play();
+            }
+        </script>
+    </body>
+</html>
