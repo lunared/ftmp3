@@ -40,9 +40,10 @@ def get_songs(path):
         'path': path
     }
 
+@app.route('/')
 @app.route('/<path:path>')
 def home(path=None):
-    if not os.path.exists(os.path.join(MUSIC_DIRECTORY, path)):
+    if path and not os.path.exists(os.path.join(MUSIC_DIRECTORY, path)):
         return abort(404)
     # detect if file
     if path and FORMAT_MATCH.search(path):
