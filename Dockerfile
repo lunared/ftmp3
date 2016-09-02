@@ -1,4 +1,4 @@
-FROM python:3.6-alpine
+FROM python:3.5-alpine
 
 ADD requirements.txt requirements.txt
 RUN pip install -r requirements.txt
@@ -7,5 +7,5 @@ EXPOSE 5000
 
 WORKDIR /var/www
 
-ENTRYPOINT ["python"]
-CMD ["app.py", "-p 8000"]
+ENTRYPOINT ["gunicorn"]
+CMD ["-w", "4", "-b", "0.0.0.0:5000", "app:app"]

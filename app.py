@@ -1,3 +1,5 @@
+#! /bin/python3.5
+
 from flask import Flask, render_template, request, send_from_directory, abort
 import decimal
 import glob
@@ -10,9 +12,12 @@ app = Flask(__name__,)
 # Do not change this unless you're not using the docker-compose
 # It is preferred you use just change the volume mapping on the docker-compose.yml
 MUSIC_DIRECTORY = "/media/Music/"
-
+# Tells flask to serve the mp3 files
+# Typically you'd want nginx to do this instead, as this is an
+# easy way to cause concurrent response issues with flask
+SERVE_FILES = False
 # acceptable standard html5 compatible formats
-FORMAT_MATCH = re.compile(r"(mp3|ogg|midi|mid)$")
+FORMAT_MATCH = re.compile(r"\.(mp3|ogg|midi|mid)$")
 
 
 def get_songs(path):
@@ -45,12 +50,11 @@ def get_songs(path):
 def home(path=None):
     if path and not os.path.exists(os.path.join(MUSIC_DIRECTORY, path)):
         return abort(404)
-    # detect if file
-    if path and FORMAT_MATCH.search(path):
+    if SERVE_FILES and path and FORMAT_MATCH.search(path):
         return send_from_directory(MUSIC_DIRECTORY, path)
     context = get_songs(path)
     return render_template("body.html", **context), 200
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', port=5000)

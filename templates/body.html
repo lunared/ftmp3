@@ -86,7 +86,7 @@
         <div class="container">
             <h2>{{path}}</h2>
             <h3 id="nowplaying">Now playing: <span>---</span></h3>
-            <audio controls></audio>
+            <audio controls preload="none"></audio>
             
             <fieldset id="controls">
                 <legend>Controls</legend>
@@ -149,7 +149,15 @@
             var player = document.getElementsByTagName("audio")[0];
             var nowplaying = document.getElementById("nowplaying");
             player.addEventListener('ended', playNext);
+            player.addEventListener('canplaythrough', function(){
+                // only play once we know we can
+                for (var s of songs) {
+                   s.classList.remove("playing");
+                }
+                song.classList.add("playing");
 
+                player.play();
+            });
             var controls = document.getElementById("controls");
             var shuffle = controls.elements["shuffle"];
             var repeat = controls.elements["repeat"];
@@ -222,14 +230,12 @@
                 if (song == null) {
                     return;
                 }
-
-                player.src = window.location + song.getAttribute('data-url');
-                for (var s of songs) {
-                    s.classList.remove("playing");
-                }
-                song.classList.add("playing");
-                player.load();
-                player.play();
+                player.pause();
+                //safely pause
+                setTimeout(function(){
+                	player.src = window.location + song.getAttribute('data-url');
+        	        player.load();
+        		}, 150);
 
                 nowplaying.children[0].innerHTML = song.getAttribute('data-title');
             }
