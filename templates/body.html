@@ -84,7 +84,7 @@
     </head>
     <body>
         <div class="container">
-            <h2>{{path}}</h2>
+            <h2>{{path or '/'}}</h2>
             <h3 id="nowplaying">Now playing: <span>---</span></h3>
             <audio controls preload="none"></audio>
             
