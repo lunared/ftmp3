@@ -185,7 +185,6 @@
                               <svg id="visualizer" viewBox="0 0 1200 200"
                                 xmlns:svg="http://www.w3.org/2000/svg"
                                 xmlns="http://www.w3.org/2000/svg">
-                                <rect x="0" y="300" width="5" height="100"></rect>
                               </svg>
                             </td>
                           </tr>
@@ -365,12 +364,13 @@
           var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           var audioSrc = audioCtx.createMediaElementSource(player);
           var analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 128;
 
           // Bind our analyser to the media element source.
           audioSrc.connect(analyser);
           audioSrc.connect(audioCtx.destination);
 
-          var frequencyData = new Uint8Array(200);
+          var frequencyData = new Uint8Array(analyser.frequencyBinCount);
           var freqScale = 300;
           var svgHeight = 200;
           var svgWidth = 1200;
