@@ -1,11 +1,13 @@
 #! /bin/python3.5
 
-from flask import Flask, render_template, request, send_from_directory, abort
-import decimal
-import glob
+from flask import Flask, render_template, request, send_from_directory, abort, send_file
 from mutagen.mp3 import EasyMP3 as MP3
 from mutagen.easyid3 import EasyID3 as ID3
-import os, re
+import decimal
+import glob
+import os
+import re
+import io
 import base64
 
 app = Flask(__name__,)
@@ -23,13 +25,13 @@ FORMAT_MATCH = re.compile(r"\.(mp3|ogg|midi|mid)$")
 
 # add cover image reading
 def read_cover_image(id3, key):
-    apic = id3.getall(key)
+    apic = id3.getall('APIC')
     images = list(filter(lambda pic: pic.type == 3, apic))
     if len(images):
         return images[0]
     return None
 
-ID3.RegisterKey('APIC', getter=read_cover_image)
+ID3.RegisterKey('cover', getter=read_cover_image)
 
 def get_songs(path):
     filepath = "{0}".format(MUSIC_DIRECTORY)
@@ -49,9 +51,9 @@ def get_songs(path):
                 'length':"{0}:{1:02d}".format(int(song.info.length//60), int(song.info.length%60)),
                 'path':f,
             }
-            if song.tags.get('APIC'):
-                cover = song.tags.get('APIC')
-                info['cover'] = "data:{:s};base64,{:s}".format(cover.mime, base64.encodebytes(cover.data).decode('utf-8'))
+            if song.tags.get('cover'):
+                cover = song.tags.get('cover')
+                info['cover'] = "{:s}/cover".format(f)
         else:
             info = {
                 'title': f,
@@ -64,6 +66,21 @@ def get_songs(path):
         'songs': sorted(songs, key=lambda song: (song['album'], song.get('track', '0'), song['artist'], song['title'])),
         'path': path
     }
+
+@app.route('/<path:path>/cover')
+def cover(path):
+    """
+    Gets the cover image for a shared song
+    """
+    songpath = "{0}{1}".format(MUSIC_DIRECTORY, path)
+    song = MP3(songpath)
+    if song.tags:
+        if song.tags.get('cover'):
+            cover = song.tags.get('cover')
+            return send_file(io.BytesIO(cover.data),
+                             mimetype=cover.mime)
+    return None, status.HTTP_404_NOT_FOUND
+
 
 @app.route('/')
 @app.route('/<path:path>')
