@@ -86,6 +86,7 @@
 
             #nowplaying {
               vertical-align: top;
+              font-size: 1rem;
             }
 
             @media (max-width: 600px) {
@@ -129,6 +130,9 @@
               fill: white;
             }
 
+            #info {
+              font-size: 0;
+            }
         </style>
 
     </head>
@@ -136,10 +140,10 @@
         <div class="container">
             <h2>{{path or '/'}}</h2>
 
-            <table>
+            <table id="info">
               <tbody>
                 <tr>
-                  <td width="200" rowspan="2" style="padding: 0 .5rem">
+                  <td width="200" rowspan="2" style="padding: 0 .5rem 0 0">
                     <img id="cover" />
                   </td>
                   <td id="nowplaying">
@@ -159,7 +163,7 @@
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="2">
+                  <td colspan="2" style="padding: .5rem 0">
                     <audio controls preload="none"></audio>
                   </td>
                 </tr>
