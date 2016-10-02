@@ -35,6 +35,7 @@
                 margin-top: 2rem;
                 width: 100%;
                 table-layout: fixed;
+                border-spacing: 2px;
             }
 
             table thead th {
@@ -77,7 +78,7 @@
                 text-align: right;
             }
             fieldset {
-                margin: .5em 0;
+                margin: .5em 2px;
             }
 
             .cover.lg {
@@ -154,6 +155,11 @@
             #info table {
               margin-top: 0;
             }
+
+            .footer {
+              text-align: right;
+              margin-right: 2px;
+            }
         </style>
 
     </head>
@@ -167,7 +173,7 @@
                 <tbody>
                   <tr>
                     <td>
-                      <table>
+                      <table style="border-spacing: 0;">
                         <tbody>
                           <tr>
                             <td rowspan="2" style="padding: 0 .5rem 0 0" width="200" class="hide-on-small">
@@ -256,7 +262,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <h6 class="right"><a href="https://github.com/nhydock/ftmp3">Powered by ftmp3</a></h6>
+            <h6 class="footer"><a href="https://github.com/nhydock/ftmp3">Powered by ftmp3</a></h6>
         </div>
         <script>
             var songs = document.getElementsByClassName("song");
