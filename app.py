@@ -3,8 +3,10 @@
 from flask import Flask, render_template, request, send_from_directory, abort
 import decimal
 import glob
-import tinytag
+from mutagen.mp3 import EasyMP3 as MP3
+from mutagen.easyid3 import EasyID3 as ID3
 import os, re
+import base64
 
 app = Flask(__name__,)
 
@@ -19,29 +21,47 @@ SERVE_FILES = False
 # acceptable standard html5 compatible formats
 FORMAT_MATCH = re.compile(r"\.(mp3|ogg|midi|mid)$")
 
+# add cover image reading
+def read_cover_image(id3, key):
+    apic = id3.getall(key)
+    images = list(filter(lambda pic: pic.type == 3, apic))
+    if len(images):
+        return images[0]
+    return None
+
+ID3.RegisterKey('APIC', getter=read_cover_image)
 
 def get_songs(path):
     filepath = "{0}".format(MUSIC_DIRECTORY)
     if path:
         filepath = "{0}{1}".format(MUSIC_DIRECTORY, path)
     files = [f for f in os.listdir(filepath) if FORMAT_MATCH.search(f)]
-    #raise ValueError(files)
     songs = []
-    for file in files:
-        songpath = "{0}{1}".format(filepath, file)
-        #raise ValueError(songpath)
-        song = tinytag.TinyTag.get(songpath)
-        songs.append({
-            'artist':song.artist if song.artist else "",
-            'title':song.title,
-            'track':song.track if song.track else "",
-            'album':song.album if song.album else "",
-            'length':"{0}:{1:02d}".format(int(song.duration//60), int(song.duration%60)),
-            'path':file
-        })
+    for f in files:
+        songpath = "{0}{1}".format(filepath, f)
+        song = MP3(songpath)
+        if song.tags:
+            info = {
+                'artist':song.tags.get('artist', [''])[0],
+                'title':song.tags.get('title', [f])[0],
+                'track':song.tags.get('tracknumber', [''])[0],
+                'album':song.tags.get('album', [''])[0],
+                'length':"{0}:{1:02d}".format(int(song.info.length//60), int(song.info.length%60)),
+                'path':f,
+            }
+            if song.tags.get('APIC'):
+                cover = song.tags.get('APIC')
+                info['cover'] = "data:{:s};base64,{:s}".format(cover.mime, base64.encodebytes(cover.data).decode('utf-8'))
+        else:
+            info = {
+                'title': f,
+                'album': '',
+                'artist': ''
+            }
+        songs.append(info)
 
     return {
-        'songs': sorted(songs, key=lambda song: (song['album'], int(song['track'] if song['track'] else 0), song['artist'], song['title'])),
+        'songs': sorted(songs, key=lambda song: (song['album'], song.get('track', '0'), song['artist'], song['title'])),
         'path': path
     }
 
