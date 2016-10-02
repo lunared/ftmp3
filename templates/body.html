@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <title>FTMP3 - {{path or '/'}}</title>
+        <meta name=viewport content="width=device-width, initial-scale=1">
         <style>
             @keyframes marquee {
                 0%, 20%   { transform: translate(0%, 0); }
@@ -78,10 +80,19 @@
                 margin: .5em 0;
             }
 
-            #cover {
+            .cover.lg {
               width: 200px;
               height: 200px;
               border: 1px solid white;
+            }
+
+            .cover.sm {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: auto;
+              opacity: .5;
             }
 
             #nowplaying {
@@ -94,10 +105,8 @@
                     display: none;
                 }
 
-                #cover {
-                  width: 200px;
-                  height: 200px;
-                  border: 1px solid white;
+                #nowplaying {
+                  min-height: 300px;
                 }
 
                 #nowplaying h4 {
@@ -111,9 +120,17 @@
                   box-sizing: border-box;
                 }
 
-                #nowplaying h4 span {
+                #title {
                   animation: marquee 15s linear infinite;
                   display: inline-block;
+                }
+
+                #info {
+                  height: auto;
+                  overflow: hidden;
+                  box-sizing: border-box;
+                  position: relative;
+                  padding-top: 80px;
                 }
             }
             @media (min-width: 600px) {
@@ -133,6 +150,10 @@
             #info {
               font-size: 0;
             }
+
+            #info table {
+              margin-top: 0;
+            }
         </style>
 
     </head>
@@ -140,36 +161,46 @@
         <div class="container">
             <h2>{{path or '/'}}</h2>
 
-            <table id="info">
-              <tbody>
-                <tr>
-                  <td width="200" rowspan="2" style="padding: 0 .5rem 0 0">
-                    <img id="cover" />
-                  </td>
-                  <td id="nowplaying">
-                    <h3 style="margin-top: 0">Now playing:</h3>
-                    <h4>
-                      <span>---</span>
-                    </h4>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="vertical-align: bottom">
-                    <svg id="visualizer" viewBox="0 0 1200 200"
-                      xmlns:svg="http://www.w3.org/2000/svg"
-                      xmlns="http://www.w3.org/2000/svg">
-                      <rect x="0" y="300" width="5" height="100"></rect>
-                    </svg>
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="2" style="padding: .5rem 0">
-                    <audio controls preload="none"></audio>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
+            <div id="info">
+              <img class="cover sm hide-on-large" />
+              <table>
+                <tbody>
+                  <tr>
+                    <td>
+                      <table>
+                        <tbody>
+                          <tr>
+                            <td rowspan="2" style="padding: 0 .5rem 0 0" width="200" class="hide-on-small">
+                              <img class="cover lg" />
+                            </td>
+                            <td id="nowplaying">
+                              <h3 style="margin-top: 0">Now playing:</h3>
+                              <h4>
+                                <span id="title">---</span>
+                              </h4>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="vertical-align: bottom">
+                              <svg id="visualizer" viewBox="0 0 1200 200"
+                                xmlns:svg="http://www.w3.org/2000/svg"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <rect x="0" y="300" width="5" height="100"></rect>
+                              </svg>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: .5rem 0 0 0">
+                      <audio controls preload="none"></audio>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
             <fieldset id="controls">
                 <legend>Controls</legend>
                 <label>
@@ -232,8 +263,8 @@
             var songs = document.getElementsByClassName("song");
             var shuffleList = [];
             var player = document.getElementsByTagName("audio")[0];
-            var title = document.getElementById("nowplaying");
-            var cover = document.getElementById("cover");
+            var title = document.getElementById("title");
+            var cover = document.getElementsByClassName("cover");
             player.addEventListener('ended', playNext);
             player.addEventListener('canplaythrough', function(){
                 // only play once we know we can
@@ -321,10 +352,11 @@
                 //safely pause
                 setTimeout(function(){
                 	player.src = window.location + song.getAttribute('data-url');
-                  cover.src = song.getAttribute('data-img');
+                  cover[0].src = song.getAttribute('data-img');
+                  cover[1].src = song.getAttribute('data-img');
         	        player.load();
                 }, 150);
-                title.children[1].children[0].innerHTML = song.getAttribute('data-title');
+                title.innerHTML = song.getAttribute('data-title');
             }
         </script>
 
