@@ -271,16 +271,19 @@
             var title = document.getElementById("title");
             var cover = document.getElementsByClassName("cover");
             player.addEventListener('ended', playNext);
-            player.addEventListener('canplaythrough', function(){
+            var changeActiveSong = function(){
                 // only play once we know we can
                 for (var s of songs) {
                    s.classList.remove("playing");
-                   if (player.src == window.location + escape(s.getAttribute('data-url'))) {
+                   if (player.getAttribute('data-url') == s.getAttribute('data-url')) {
                      s.classList.add("playing");
                    }
                 }
                 player.play();
-            });
+            };
+            player.addEventListener('canplaythrough', changeActiveSong);
+            player.addEventListener('canplay', changeActiveSong);
+
             var controls = document.getElementById("controls");
             var shuffle = controls.elements["shuffle"];
             var repeat = controls.elements["repeat"];
@@ -356,10 +359,11 @@
                 player.pause();
                 //safely pause
                 setTimeout(function(){
-                	player.src = window.location + song.getAttribute('data-url');
+                  player.src = window.location + song.getAttribute('data-url');
+                  player.setAttribute('data-url', song.getAttribute('data-url'));
                   cover[0].src = song.getAttribute('data-img');
                   cover[1].src = song.getAttribute('data-img');
-        	        player.load();
+        	  player.load();
                 }, 150);
                 title.innerHTML = song.getAttribute('data-title');
             }
