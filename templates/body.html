@@ -25,6 +25,7 @@
                 margin: auto;
                 box-sizing: border-box;
                 padding: 0.83em;
+                margin-top: 40px;
             }
 
             audio {
@@ -160,12 +161,58 @@
               text-align: right;
               margin-right: 2px;
             }
+
+            nav {
+              position: fixed;
+              left: 0;
+              right: 0;
+              top: 0;
+              bottom: 0;
+              display: block;
+              overflow: auto;
+              height: 100%;
+              padding: 10px 0 10px 40px;
+              background: rgba(0,0,0,.8);
+              transition: opacity .2s linear;
+              opacity: 0;
+              pointer-events: none;
+              font-size: 20px;
+              font-family: monospace;
+            }
+
+            nav ul {
+              list-style: none;
+              margin: 0;
+            }
+            nav li {
+              margin: 6px 0px;
+            }
+
+            nav a {
+              color: white;
+              text-decoration: none;
+            }
+
+            body.show-nav {
+              overflow: hidden;
+            }
+
+            body.show-nav nav {
+              pointer-events: fill;
+              opacity: 1;
+            }
+
+            .clickable:hover {
+              cursor: pointer;
+            }
         </style>
 
     </head>
     <body>
         <div class="container">
-            <h2>{{path or '/'}}</h2>
+            <h2 onclick="document.body.classList.toggle('show-nav')" class="clickable">
+              {{path or '/'}}
+            </h2>
 
             <div id="info">
               <img class="cover sm hide-on-large" />
@@ -264,6 +311,18 @@
             </table>
             <h6 class="footer"><a href="https://github.com/nhydock/ftmp3">Powered by ftmp3</a></h6>
         </div>
+
+        <!-- directory tree navigation -->
+        <nav onclick="document.body.classList.remove('show-nav')">
+          <ul>
+          {% for directory in tree %}
+            <li>
+              <a href="/{{directory}}">/{{directory}}</a>
+            </li>
+          {% endfor %}
+          </ul>
+        </nav>
+
         <script>
             var songs = document.getElementsByClassName("song");
             var shuffleList = [];

@@ -9,6 +9,7 @@ import os
 import re
 import io
 import base64
+import fnmatch
 
 app = Flask(__name__,)
 
@@ -22,6 +23,20 @@ MUSIC_DIRECTORY = "/media/Music/"
 SERVE_FILES = False
 # acceptable standard html5 compatible formats
 FORMAT_MATCH = re.compile(r"\.(mp3|ogg|midi|mid)$")
+
+
+# when starting up the app, we make sure we cache the directory tree of all folders
+# that may be traversed by ftmp3.  This allows us to have a nice navigation menu
+# of the file system.
+def get_dir_tree():
+    tree = []
+    for path, dirs, files in os.walk(MUSIC_DIRECTORY):
+        if len(fnmatch.filter(files, '*.mp3')) > 0:
+            if not path.endswith('/'):
+                path += '/'
+            tree.append(path[len(MUSIC_DIRECTORY):])
+    return tree
+DIR_TREE = get_dir_tree()
 
 # add cover image reading
 def read_cover_image(id3, key):
@@ -64,7 +79,8 @@ def get_songs(path):
 
     return {
         'songs': sorted(songs, key=lambda song: (song['album'], song.get('track', '0'), song['artist'], song['title'])),
-        'path': path
+        'path': path,
+        'tree': DIR_TREE
     }
 
 @app.route('/<path:path>/cover')
