@@ -3,6 +3,7 @@
 from flask import Flask, render_template, request, send_from_directory, abort, send_file
 from mutagen.mp3 import EasyMP3 as MP3
 from mutagen.easyid3 import EasyID3 as ID3
+from mutagen.id3 import PictureType
 import decimal
 import glob
 import os
@@ -41,7 +42,8 @@ DIR_TREE = get_dir_tree()
 # add cover image reading
 def read_cover_image(id3, key):
     apic = id3.getall('APIC')
-    images = list(filter(lambda pic: pic.type == 3, apic))
+    images = sorted(list(filter(lambda pic: pic.type in [PictureType.OTHER, PictureType.COVER_FRONT], apic)),
+                    key=(lambda pic: -pic.type))
     if len(images):
         return images[0]
     return None
@@ -67,13 +69,12 @@ def get_songs(path):
                 'path':f,
             }
             if song.tags.get('cover'):
-                cover = song.tags.get('cover')
-                info['cover'] = "{:s}/cover".format(f)
+                info['cover'] = True
         else:
             info = {
                 'title': f,
                 'album': '',
-                'artist': ''
+                'artist': '',
             }
         songs.append(info)
 
@@ -93,8 +94,7 @@ def cover(path):
     if song.tags:
         if song.tags.get('cover'):
             cover = song.tags.get('cover')
-            return send_file(io.BytesIO(cover.data),
-                             mimetype=cover.mime)
+            return send_file(io.BytesIO(cover.data),mimetype=cover.mime)
     return None, status.HTTP_404_NOT_FOUND
 
 

@@ -86,6 +86,7 @@
               width: 200px;
               height: 200px;
               border: 1px solid white;
+              object-fit: contain;
             }
 
             .cover.sm {
@@ -295,7 +296,7 @@
                         data-title="{{song.artist}} - {{song.title}}"
                         {% endif %}
                         {% if song.cover %}
-                        data-img="{{song.cover}}"
+                        data-img="{{song.path}}/cover"
                         {% endif %}
                         onclick="playTrack(this)"
                         >
