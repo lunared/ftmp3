@@ -197,6 +197,9 @@
             .pull-right {
                 float: right;
             }
+            .center {
+                text-align: center;
+            }
         </style>
 
     </head>
@@ -291,10 +294,11 @@
                         <th>Title</th>
                         <th class="hide-on-small">Album</th>
                         <th width="50">Length</th>
+                        <th class="hide-on-small" width="40">Save</th>
                     </thead>
                     <tbody>
                         {% for song in songs %}
-                        <tr data-url="{{song.path}}" class="song"
+                        <tr data-url="{{song.path}}/stream" class="song"
                             {% if song.track %}
                             data-title="{{song.track}}. {{song.artist}} - {{song.title}}"
                             {% else %}
@@ -311,6 +315,11 @@
                             <td>{{song.title}}</td>
                             <td class="hide-on-small">{{song.album}}</td>
                             <td class="right">{{song.length}}</td>
+                            <td class="center">
+                                <a href="/{{path}}/{{song.path}}" target="_blank" onclick="event.stopPropagation()">
+                                    <img src="/__static__/Media-floppy.svg" width="16" height="16">
+                                </a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

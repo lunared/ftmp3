@@ -48,3 +48,8 @@ def home(path=None):
         return send_from_directory(app.config['MUSIC_DIRECTORY'], path)
     context = get_songs(path)
     return render_template("body.html", **context), 200
+
+
+@app.route('/__static__/<path:path>')
+def staticfiles(path):
+    return send_from_directory('../static', path)
