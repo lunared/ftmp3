@@ -194,7 +194,9 @@
             .clickable:hover {
               cursor: pointer;
             }
-
+            .pull-right {
+                float: right;
+            }
         </style>
 
     </head>
@@ -265,14 +267,56 @@
             </fieldset>
 
             <nav>
-                <a href="#songs" class="tab" for="songs">Songs</a>
+                {% if songs %}
+                <a href="#songs" class="tab">Songs</a>
+                {% endif %}
                 {% if subdirectories %}
-                <a href="#directories" class="tab" for="directories">Subdirectories</a>
+                <a href="#directories" class="tab">Subdirectories</a>
                 {% endif %}
                 {% if playlists %}
-                <a href="#playlists" class="tab" for="playlists">Playlists</a>
+                <a href="#playlists" class="tab">Playlists</a>
+                {% endif %}
+                <span class="tab">&nbsp;</span>
+                {% if parent != path %}
+                <a href="/{{parent}}" class="tab pull-right">..</a>
                 {% endif %}
             </nav>
+            {% if songs %}
+            <section id="songs">
+                <table class="table">
+                    <thead>
+                        <th width="30"></th>
+                        <th width="40">Track</th>
+                        <th class="hide-on-small" width="170">Artist</th>
+                        <th>Title</th>
+                        <th class="hide-on-small">Album</th>
+                        <th width="50">Length</th>
+                    </thead>
+                    <tbody>
+                        {% for song in songs %}
+                        <tr data-url="{{song.path}}" class="song"
+                            {% if song.track %}
+                            data-title="{{song.track}}. {{song.artist}} - {{song.title}}"
+                            {% else %}
+                            data-title="{{song.artist}} - {{song.title}}"
+                            {% endif %}
+                            {% if song.cover %}
+                            data-img="{{song.path}}/cover"
+                            {% endif %}
+                            onclick="playTrack(this)"
+                            >
+                            <td></td>
+                            <td>{{song.track}}</td>
+                            <td class="hide-on-small">{{song.artist}}</td>
+                            <td>{{song.title}}</td>
+                            <td class="hide-on-small">{{song.album}}</td>
+                            <td class="right">{{song.length}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+            {% endif %}
             {% if subdirectories %}
             <section id="directories">
                 <table class="table">
@@ -319,40 +363,6 @@
                 </table>
             </section>
             {% endif %}
-            <section id="songs">
-                <table class="table">
-                    <thead>
-                        <th width="30"></th>
-                        <th width="40">Track</th>
-                        <th class="hide-on-small" width="170">Artist</th>
-                        <th>Title</th>
-                        <th class="hide-on-small">Album</th>
-                        <th width="50">Length</th>
-                    </thead>
-                    <tbody>
-                        {% for song in songs %}
-                        <tr data-url="{{song.path}}" class="song"
-                            {% if song.track %}
-                            data-title="{{song.track}}. {{song.artist}} - {{song.title}}"
-                            {% else %}
-                            data-title="{{song.artist}} - {{song.title}}"
-                            {% endif %}
-                            {% if song.cover %}
-                            data-img="{{song.cover}}"
-                            {% endif %}
-                            onclick="playTrack(this)"
-                            >
-                            <td></td>
-                            <td>{{song.track}}</td>
-                            <td class="hide-on-small">{{song.artist}}</td>
-                            <td>{{song.title}}</td>
-                            <td class="hide-on-small">{{song.album}}</td>
-                            <td class="right">{{song.length}}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </section>
             <h6 class="footer"><a href="https://github.com/nhydock/ftmp3">Powered by ftmp3</a></h6>
         </div>
 
@@ -371,13 +381,13 @@
                 var tabs = document.getElementsByClassName("tab");
                 for (var s of tabs) {
                     s.classList.remove("active");
-                    if (s.attributes['href'].value == location.hash) {
+                    if (s.attributes['href'] && s.attributes['href'].value == location.hash) {
                         s.classList.add("active");
                     }
                 }
 
-                if (location.hash == null) {
-                    document.getElementsByTagName("section")[0].classList.add("active");
+                if (!location.hash) {
+                    document.getElementsByTagName("section")[0].classList.add("visible");
                     document.getElementsByClassName("tab")[0].classList.add("active");
                 }
             }
@@ -483,11 +493,11 @@
                 player.pause();
                 //safely pause
                 setTimeout(function(){
-                	player.src = location.pathname + song.getAttribute('data-url');
+                  player.src = location.pathname + song.getAttribute('data-url');
                   player.setAttribute('data-url', song.getAttribute('data-url'));
                   cover[0].src = song.getAttribute('data-img');
                   cover[1].src = song.getAttribute('data-img');
-        	  player.load();
+        	      player.load();
                 }, 150);
                 title.innerHTML = song.getAttribute('data-title');
             }
