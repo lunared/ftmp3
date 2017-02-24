@@ -9,6 +9,7 @@ services:
      - ${FTMP3_MUSIC}:/media/Music
     environment:
      - FTMP3_MUSIC=/media/Music/
+     - FTMP3_PORT=5000
   nginx:
     image: nginx:alpine
     volumes:
