@@ -39,6 +39,11 @@
                 border-spacing: 2px;
             }
 
+            table a {
+                text-decoration: none;
+                color: inherit;
+            }
+
             table thead th {
                 border: none;
                 margin: 0;
@@ -46,11 +51,11 @@
                 font-family: monospace;
             }
 
-            #songs tbody tr:hover {
+            .table tbody tr:hover {
                 cursor: pointer;
             }
 
-            #songs tbody tr:nth-child(even) {
+            .table tbody tr:nth-child(even) {
                 background: rgba(255,255,255,.2);
             }
 
@@ -64,7 +69,7 @@
                 content: ">>";
                 opacity: 1;
             }
-            #songs tbody tr td:not(:first-child) {
+            .table tbody tr td:not(:first-child) {
                 font-family: monospace;
             }
             table tbody tr td,
@@ -163,58 +168,38 @@
               margin-right: 2px;
             }
 
-            nav {
-              position: fixed;
-              left: 0;
-              right: 0;
-              top: 0;
-              bottom: 0;
-              display: block;
-              overflow: auto;
-              height: 100%;
-              padding: 10px 0 10px 40px;
-              background: rgba(0,0,0,.8);
-              transition: opacity .2s linear;
-              opacity: 0;
-              pointer-events: none;
-              font-size: 20px;
-              font-family: monospace;
+            section {
+                display: none;
+            }
+            section.visible {
+                display: block;
             }
 
-            nav ul {
-              list-style: none;
-              margin: 0;
-            }
-            nav li {
-              margin: 6px 0px;
-            }
-
-            nav a {
-              color: white;
-              text-decoration: none;
+            nav a.tab {
+                padding: 1em;
+                display: inline-block;
+                margin-top: 1em;
+                color: inherit;
+                text-decoration: none;
             }
 
-            body.show-nav {
-              overflow: hidden;
+            nav a.tab.active {
+                border-bottom: none;
+                border-top: 1px solid white;
+                border-left: 1px solid white;
+                border-right: 1px solid white;
+                border-top-left-radius: .5em;
+                border-top-right-radius: .5em;
             }
-
-            body.show-nav nav {
-              pointer-events: fill;
-              opacity: 1;
-            }
-
             .clickable:hover {
               cursor: pointer;
             }
+
         </style>
 
     </head>
     <body>
         <div class="container">
-            <h2 onclick="document.body.classList.toggle('show-nav')" class="clickable">
-              {{path or '/'}}
-            </h2>
-
             <div id="info">
               <img class="cover sm hide-on-large" />
               <table>
@@ -278,52 +263,131 @@
                     Once
                 </label>
             </fieldset>
-            <table id="songs">
-                <thead>
-                    <th width="30"></th>
-                    <th width="40">Track</th>
-                    <th class="hide-on-small" width="170">Artist</th>
-                    <th>Title</th>
-                    <th class="hide-on-small">Album</th>
-                    <th width="50">Length</th>
-                </thead>
-                <tbody>
-                    {% for song in songs %}
-                    <tr data-url="{{song.path}}" class="song"
-                        {% if song.track %}
-                        data-title="{{song.track}}. {{song.artist}} - {{song.title}}"
-                        {% else %}
-                        data-title="{{song.artist}} - {{song.title}}"
-                        {% endif %}
-                        {% if song.cover %}
-                        data-img="{{song.path}}/cover"
-                        {% endif %}
-                        onclick="playTrack(this)"
-                        >
-                        <td></td>
-                        <td>{{song.track}}</td>
-                        <td class="hide-on-small">{{song.artist}}</td>
-                        <td>{{song.title}}</td>
-                        <td class="hide-on-small">{{song.album}}</td>
-                        <td class="right">{{song.length}}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+            <nav>
+                <a href="#songs" class="tab" for="songs">Songs</a>
+                {% if subdirectories %}
+                <a href="#directories" class="tab" for="directories">Subdirectories</a>
+                {% endif %}
+                {% if playlists %}
+                <a href="#playlists" class="tab" for="playlists">Playlists</a>
+                {% endif %}
+            </nav>
+            {% if subdirectories %}
+            <section id="directories">
+                <table class="table">
+                    <thead>
+                        <th>Path</th>
+                        <th width="70">Songs</th>
+                        <th width="70">Folders</th>
+                        <th width="70">Playlists</th>
+                    </thead>    
+                    <tbody>
+                        {% for dir in subdirectories %}
+                        <tr>
+                            <td>
+                                <a href="/{{dir.path}}/">
+                                    {{dir.name}}
+                                </a>
+                            </td>
+                            <td>{{dir.songs}}</td>
+                            <td>{{dir.directories}}</td>
+                            <td>{{dir.playlists}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+            {% endif %}
+            {% if playlists %}
+            <section id="playlists">
+                <table class="table">
+                    <thead>
+                        <th>Path</th>
+                        <th width="70">Songs</th>
+                        <th width="90">Duration</th>
+                    </thead>    
+                    <tbody>
+                        {% for playlist in playlists %}
+                        <tr>
+                            <td>{{playlist}}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+            {% endif %}
+            <section id="songs">
+                <table class="table">
+                    <thead>
+                        <th width="30"></th>
+                        <th width="40">Track</th>
+                        <th class="hide-on-small" width="170">Artist</th>
+                        <th>Title</th>
+                        <th class="hide-on-small">Album</th>
+                        <th width="50">Length</th>
+                    </thead>
+                    <tbody>
+                        {% for song in songs %}
+                        <tr data-url="{{song.path}}" class="song"
+                            {% if song.track %}
+                            data-title="{{song.track}}. {{song.artist}} - {{song.title}}"
+                            {% else %}
+                            data-title="{{song.artist}} - {{song.title}}"
+                            {% endif %}
+                            {% if song.cover %}
+                            data-img="{{song.cover}}"
+                            {% endif %}
+                            onclick="playTrack(this)"
+                            >
+                            <td></td>
+                            <td>{{song.track}}</td>
+                            <td class="hide-on-small">{{song.artist}}</td>
+                            <td>{{song.title}}</td>
+                            <td class="hide-on-small">{{song.album}}</td>
+                            <td class="right">{{song.length}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
             <h6 class="footer"><a href="https://github.com/nhydock/ftmp3">Powered by ftmp3</a></h6>
         </div>
 
-        <!-- directory tree navigation -->
-        <nav onclick="document.body.classList.remove('show-nav')">
-          <ul>
-          {% for directory in tree %}
-            <li>
-              <a href="/{{directory}}">/{{directory}}</a>
-            </li>
-          {% endfor %}
-          </ul>
-        </nav>
+        <!-- navigation -->
+        <script>
+            function switchTab() {
+                var hash = location.hash.substr(1);
+                var sections = document.getElementsByTagName("section");
+                for (var s of sections) {
+                    s.classList.remove("visible");
+                    if (s.id == hash) {
+                        s.classList.add("visible");
+                    }
+                }
 
+                var tabs = document.getElementsByClassName("tab");
+                for (var s of tabs) {
+                    s.classList.remove("active");
+                    if (s.attributes['href'].value == location.hash) {
+                        s.classList.add("active");
+                    }
+                }
+
+                if (location.hash == null) {
+                    document.getElementsByTagName("section")[0].classList.add("active");
+                    document.getElementsByClassName("tab")[0].classList.add("active");
+                }
+            }
+
+            window.addEventListener("hashchange", switchTab, false);
+
+            switchTab();
+        </script>
+
+        <!-- audio player -->
         <script>
             var songs = document.getElementsByClassName("song");
             var shuffleList = [];
@@ -419,7 +483,7 @@
                 player.pause();
                 //safely pause
                 setTimeout(function(){
-                  player.src = window.location + song.getAttribute('data-url');
+                	player.src = location.pathname + song.getAttribute('data-url');
                   player.setAttribute('data-url', song.getAttribute('data-url'));
                   cover[0].src = song.getAttribute('data-img');
                   cover[1].src = song.getAttribute('data-img');
@@ -431,45 +495,45 @@
 
         <!-- visualizer -->
         <script>
-          var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          var audioSrc = audioCtx.createMediaElementSource(player);
-          var analyser = audioCtx.createAnalyser();
-          analyser.fftSize = 128;
+            var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            var audioSrc = audioCtx.createMediaElementSource(player);
+            var analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 128;
 
-          // Bind our analyser to the media element source.
-          audioSrc.connect(analyser);
-          audioSrc.connect(audioCtx.destination);
+            // Bind our analyser to the media element source.
+            audioSrc.connect(analyser);
+            audioSrc.connect(audioCtx.destination);
 
-          var frequencyData = new Uint8Array(analyser.frequencyBinCount);
-          var freqScale = 300;
-          var svgHeight = 200;
-          var svgWidth = 1200;
-          var barPadding = 1;
+            var frequencyData = new Uint8Array(analyser.frequencyBinCount);
+            var freqScale = 300;
+            var svgHeight = 200;
+            var svgWidth = 1200;
+            var barPadding = 1;
 
-          var svg = document.getElementById('visualizer');
-          var SVGNS = "http://www.w3.org/2000/svg";
-          // populate visualizer with bars
-          var bars = []
-          frequencyData.forEach(function(feq, i){
-            var bar = document.createElementNS(SVGNS, 'rect');
-            bar.setAttribute('x', i * (svgWidth / frequencyData.length));
-            bar.setAttribute('width', svgWidth / frequencyData.length - barPadding);
-            svg.appendChild(bar);
-            bars.push(bar);
-          });
-
-          // Render the visualizer at 60fps
-          var updateVisualizer = setInterval(function(){
-            // Copy frequency data
-            analyser.getByteFrequencyData(frequencyData);
-
-            // Update visualizer with new data.
+            var svg = document.getElementById('visualizer');
+            var SVGNS = "http://www.w3.org/2000/svg";
+            // populate visualizer with bars
+            var bars = []
             frequencyData.forEach(function(feq, i){
-              var bar = bars[i];
-              bar.setAttribute('y', svgHeight - ((svgHeight / freqScale) * feq));
-              bar.setAttribute('height', (svgHeight / freqScale) * feq);
+                var bar = document.createElementNS(SVGNS, 'rect');
+                bar.setAttribute('x', i * (svgWidth / frequencyData.length));
+                bar.setAttribute('width', svgWidth / frequencyData.length - barPadding);
+                svg.appendChild(bar);
+                bars.push(bar);
             });
-          }, 1000/30.0);
+
+            // Render the visualizer at 60fps
+            var updateVisualizer = setInterval(function(){
+                // Copy frequency data
+                analyser.getByteFrequencyData(frequencyData);
+
+                // Update visualizer with new data.
+                frequencyData.forEach(function(feq, i){
+                var bar = bars[i];
+                bar.setAttribute('y', svgHeight - ((svgHeight / freqScale) * feq));
+                bar.setAttribute('height', (svgHeight / freqScale) * feq);
+                });
+            }, 1000/30.0);
         </script>
     </body>
 </html>

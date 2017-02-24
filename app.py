@@ -42,8 +42,10 @@ DIR_TREE = get_dir_tree()
 # add cover image reading
 def read_cover_image(id3, key):
     apic = id3.getall('APIC')
-    images = sorted(list(filter(lambda pic: pic.type in [PictureType.OTHER, PictureType.COVER_FRONT], apic)),
-                    key=(lambda pic: -pic.type))
+    images = sorted(
+        list(filter(lambda pic: pic.type in [PictureType.OTHER, PictureType.COVER_FRONT], apic)),
+        key=(lambda pic: -pic.type)
+    )
     if len(images):
         return images[0]
     return None
@@ -54,7 +56,7 @@ def get_songs(path):
     filepath = "{0}".format(MUSIC_DIRECTORY)
     if path:
         filepath = "{0}{1}".format(MUSIC_DIRECTORY, path)
-    files = [f for f in os.listdir(filepath) if FORMAT_MATCH.search(f)]
+    files = filter(lambda f: FORMAT_MATCH.search(f), os.listdir(filepath))
     songs = []
     for f in files:
         songpath = "{0}{1}".format(filepath, f)
@@ -80,8 +82,31 @@ def get_songs(path):
 
     return {
         'songs': sorted(songs, key=lambda song: (song['album'], song.get('track', '0'), song['artist'], song['title'])),
-        'path': path,
-        'tree': DIR_TREE
+        'subdirectories': [{
+            'path': os.path.join(filepath, dir)[len(MUSIC_DIRECTORY):],
+            'name': os.path.basename(dir),
+            'songs': len(list(filter(
+                lambda x: FORMAT_MATCH.search(x),
+                os.listdir(os.path.join(filepath, dir))
+            ))),
+            'directories': len(
+                list(filter(
+                    lambda x: os.path.isdir(os.path.join(filepath, dir, x)),
+                    os.listdir(os.path.join(filepath, dir))
+                ))
+            ),
+            'playlists': len(
+                list(filter(
+                    lambda x: x.endswith("m3u"),
+                    os.listdir(os.path.join(filepath, dir))
+                ))
+            )
+        } for dir in list(filter(
+            lambda f: os.path.isdir(os.path.join(filepath, f)),
+            os.listdir(filepath)
+        ))],
+        'playlists': list(filter(lambda f: f.endswith("m3u"), os.listdir(filepath))),
+        'path': path
     }
 
 @app.route('/<path:path>/cover')
@@ -91,10 +116,23 @@ def cover(path):
     """
     songpath = "{0}{1}".format(MUSIC_DIRECTORY, path)
     song = MP3(songpath)
+    cover = None
+    mime = 'image/jpeg'
     if song.tags:
         if song.tags.get('cover'):
-            cover = song.tags.get('cover')
-            return send_file(io.BytesIO(cover.data),mimetype=cover.mime)
+            cover_meta = song.tags.get('cover')
+            cover = io.BytesIO(cover.data)
+            mime = cover.mime
+            return
+
+    # check for cover.jpg if not in meta tags
+    if not cover:
+        cover_jpg = os.path.join(os.path.dirname(songpath), "cover.jpg")
+        if cover_jpg.exists():
+            cover = cover_jpg
+
+    if cover:
+        return send_file(cover, mimetype=mime)
     return None, status.HTTP_404_NOT_FOUND
 
 

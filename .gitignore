@@ -1,2 +1,6 @@
 music/*
 .pyc
+
+virtual/
+
+__pycache__/
