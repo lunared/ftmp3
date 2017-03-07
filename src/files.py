@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, send_from_directory, abort, s
 from mutagen.mp3 import EasyMP3 as MP3
 from mutagen.easyid3 import EasyID3 as ID3
 from mutagen.id3 import PictureType
+from mutagen.mp3 import HeaderNotFoundError
 import decimal
 import glob
 import os
@@ -38,8 +39,12 @@ def get_songs(path):
     songs = []
     for f in files:
         songpath = "{0}{1}".format(filepath, f)
-        song = MP3(songpath)
-        if song.tags:
+        try: 
+            song = MP3(songpath)
+        except HeaderNotFoundError:
+            print("mutagen.mp3.HeaderNotFoundError for {}".format(f))
+            song = None
+        if getattr(song, "tags", None):
             info = {
                 'artist':song.tags.get('artist', [''])[0],
                 'title':song.tags.get('title', [f])[0],
