@@ -28,8 +28,8 @@ python app.py
 
 | Key | Type | Default | Description |
 | --- | --- | --- | --- | 
-| FTIMG_MUSIC | filepath | /media/Main | The root filepath of the music files to be served |
-| FTIMG_PORT  | int      | 8080 | Port number to host the app on |
+| FTMP3_MUSIC | filepath | /media/Main | The root filepath of the music files to be served |
+| FTMP3_PORT  | int      | 8080 | Port number to host the app on |
 
 
 These environment variables can be used when hosting without docker as well as within the .env file of docker-compose to
