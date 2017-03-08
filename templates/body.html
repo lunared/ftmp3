@@ -316,7 +316,7 @@
                             <td class="hide-on-small">{{song.album}}</td>
                             <td class="right">{{song.length}}</td>
                             <td class="center">
-                                <a href="/{{path}}/{{song.path}}" target="_blank" onclick="event.stopPropagation()">
+                                <a href="{{song.path}}" target="_blank" onclick="event.stopPropagation()">
                                     <img src="/__static__/Media-floppy.svg" width="16" height="16">
                                 </a>
                             </td>
@@ -339,7 +339,7 @@
                         {% for dir in subdirectories %}
                         <tr>
                             <td>
-                                <a href="/{{dir.path}}/">
+                                <a href="{{dir.path}}/">
                                     {{dir.name}}
                                 </a>
                             </td>

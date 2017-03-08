@@ -11,3 +11,7 @@ MUSIC_DIRECTORY = os.environ.get("FTMP3_MUSIC", "/media/Music")
 SERVE_FILES = True
 # acceptable standard html5 compatible formats
 FORMAT_MATCH = re.compile(r"\.(mp3|ogg|midi|mid)$")
+
+# number of directories upwards to limit recursive check for cover image
+COVER_IMG_RECURSION_LIMIT = 1
+

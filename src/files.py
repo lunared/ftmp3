@@ -1,9 +1,5 @@
 
 from flask import Flask, render_template, request, send_from_directory, abort, send_file, config
-from mutagen.mp3 import EasyMP3 as MP3
-from mutagen.easyid3 import EasyID3 as ID3
-from mutagen.id3 import PictureType
-from mutagen.mp3 import HeaderNotFoundError
 import decimal
 import glob
 import os
@@ -13,8 +9,10 @@ import base64
 import fnmatch
 
 from .app import app
+from .song import get_info
 
 config = app.config
+order_by = lambda song: (song['album'], song.get('track', '0'), song['artist'], song['title'])
 
 def get_dir_tree():
     """
@@ -34,37 +32,14 @@ DIR_TREE = get_dir_tree()
 def get_songs(path):
     filepath = "{0}".format(config['MUSIC_DIRECTORY'])
     if path:
-        filepath = "{0}{1}".format(config['MUSIC_DIRECTORY'], path)
+        filepath = os.path.join(config['MUSIC_DIRECTORY'], path)
     files = filter(lambda f: config['FORMAT_MATCH'].search(f), os.listdir(filepath))
     songs = []
     for f in files:
-        songpath = "{0}{1}".format(filepath, f)
-        try: 
-            song = MP3(songpath)
-        except HeaderNotFoundError:
-            print("mutagen.mp3.HeaderNotFoundError for {}".format(f))
-            song = None
-        if getattr(song, "tags", None):
-            info = {
-                'artist':song.tags.get('artist', [''])[0],
-                'title':song.tags.get('title', [f])[0],
-                'track':song.tags.get('tracknumber', [''])[0],
-                'album':song.tags.get('album', [''])[0],
-                'length':"{0}:{1:02d}".format(int(song.info.length//60), int(song.info.length%60)),
-                'path':f,
-            }
-            if song.tags.get('cover'):
-                info['cover'] = True
-        else:
-            info = {
-                'title': f,
-                'album': '',
-                'artist': '',
-            }
-        songs.append(info)
+        songs.append(get_info(filepath, f))
 
     return {
-        'songs': sorted(songs, key=lambda song: (song['album'], song.get('track', '0'), song['artist'], song['title'])),
+        'songs': sorted(songs, key=order_by),
         'subdirectories': [{
             'path': os.path.join(filepath, dir)[len(config['MUSIC_DIRECTORY']):],
             'name': os.path.basename(dir),
