@@ -3,205 +3,7 @@
     <head>
         <title>FTMP3 - {{path or '/'}}</title>
         <meta name=viewport content="width=device-width, initial-scale=1">
-        <style>
-            @keyframes marquee {
-                0%, 20%   { transform: translate(0%, 0); }
-                85%  { transform: translate(-100%, 0); }
-                86%  { transform: translate(-100%, 100%);}
-                87%, 95%  { transform: translate(-0%, 100%);}
-                100% { transform: translate(0%, 0); }
-            }
-
-            html, body {
-                padding: 0;
-                margin: 0;
-                background: black;
-                color: white;
-                font-family: monospace;
-            }
-            .container {
-                width: 100%;
-                max-width: 960px;
-                margin: auto;
-                box-sizing: border-box;
-                padding: 0.83em;
-                margin-top: 40px;
-            }
-
-            audio {
-                width: 100%;
-            }
-
-            table {
-                margin-top: 2rem;
-                width: 100%;
-                table-layout: fixed;
-                border-spacing: 2px;
-            }
-
-            table a {
-                text-decoration: none;
-                color: inherit;
-            }
-
-            table thead th {
-                border: none;
-                margin: 0;
-                border-bottom: 1px solid white;
-                font-family: monospace;
-            }
-
-            .table tbody tr:hover {
-                cursor: pointer;
-            }
-
-            .table tbody tr:nth-child(even) {
-                background: rgba(255,255,255,.2);
-            }
-
-            #songs tbody tr td:first-child::after {
-                content: ">>";
-                color: white;
-                opacity: 0;
-                transition: opacity .1s linear;
-            }
-            #songs tbody tr.playing td:first-child::after {
-                content: ">>";
-                opacity: 1;
-            }
-            .table tbody tr td:not(:first-child) {
-                font-family: monospace;
-            }
-            table tbody tr td,
-            table thead th {
-                padding: .2em .5em;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                overflow: hidden;
-            }
-
-            .right {
-                text-align: right;
-            }
-            fieldset {
-                margin: .5em 2px;
-            }
-
-            .cover.lg {
-              width: 200px;
-              height: 200px;
-              border: 1px solid white;
-              object-fit: contain;
-            }
-
-            .cover.sm {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: auto;
-              opacity: .5;
-            }
-
-            #nowplaying {
-              vertical-align: top;
-              font-size: 1rem;
-            }
-
-            @media (max-width: 600px) {
-                .hide-on-small {
-                    display: none;
-                }
-
-                #nowplaying {
-                  min-height: 300px;
-                }
-
-                #nowplaying h4 {
-                  width: 100%;
-                  height: 1.5em;
-                  font-size: 1.5em;
-                  line-height: 1.5em;
-                  margin: 0 auto;
-                  white-space: nowrap;
-                  overflow: hidden;
-                  box-sizing: border-box;
-                }
-
-                #title {
-                  animation: marquee 15s linear infinite;
-                  display: inline-block;
-                }
-
-                #info {
-                  height: auto;
-                  overflow: hidden;
-                  box-sizing: border-box;
-                  position: relative;
-                  padding-top: 80px;
-                }
-            }
-            @media (min-width: 600px) {
-                .hide-on-large {
-                    display: none;
-                }
-            }
-
-            #visualizer {
-              width: 100%;
-              display: block;
-            }
-            #visualizer rect {
-              fill: white;
-            }
-
-            #info {
-              font-size: 0;
-            }
-
-            #info table {
-              margin-top: 0;
-            }
-
-            .footer {
-              text-align: right;
-              margin-right: 2px;
-            }
-
-            section {
-                display: none;
-            }
-            section.visible {
-                display: block;
-            }
-
-            nav a.tab {
-                padding: 1em;
-                display: inline-block;
-                margin-top: 1em;
-                color: inherit;
-                text-decoration: none;
-            }
-
-            nav a.tab.active {
-                border-bottom: none;
-                border-top: 1px solid white;
-                border-left: 1px solid white;
-                border-right: 1px solid white;
-                border-top-left-radius: .5em;
-                border-top-right-radius: .5em;
-            }
-            .clickable:hover {
-              cursor: pointer;
-            }
-            .pull-right {
-                float: right;
-            }
-            .center {
-                text-align: center;
-            }
-        </style>
-
+        <link rel="stylesheet" type="text/css" href="/__static__/style.css">
     </head>
     <body>
         <div class="container">
@@ -244,29 +46,31 @@
                 </tbody>
               </table>
             </div>
-            <fieldset id="controls">
+            <fieldset>
                 <legend>Controls</legend>
-                <label>
-                    <input type="checkbox" name="autoplay" onclick="toggleControls()" checked/>
-                    Autoplay
-                </label>
-                <label>
-                    <input type="checkbox" name="shuffle" onclick="toggleShuffle()"/>
-                    Shuffle
-                </label>
-                <br class="hide-on-large">
-                <label>
-                    <input type="radio" name="repeat" value="one"/>
-                    Repeat 1
-                </label>
-                <label>
-                    <input type="radio" name="repeat" value="all" checked/>
-                    Repeat All
-                </label>
-                <label>
-                    <input type="radio" name="repeat" value="no"/>
-                    Once
-                </label>
+                <form id="controls">
+                    <label>
+                        <input type="checkbox" name="autoplay" onchange="AudioPlayer.toggleControls()" checked/>
+                        Autoplay
+                    </label>
+                    <label>
+                        <input type="checkbox" name="shuffle" onchange="AudioPlayer.reshuffle()"/>
+                        Shuffle
+                    </label>
+                    <br class="hide-on-large">
+                    <label>
+                        <input type="radio" name="repeat" value="one"/>
+                        Repeat 1
+                    </label>
+                    <label>
+                        <input type="radio" name="repeat" value="all" checked/>
+                        Repeat All
+                    </label>
+                    <label>
+                        <input type="radio" name="repeat" value="no"/>
+                        Once
+                    </label>
+                </form>
             </fieldset>
 
             <nav>
@@ -275,6 +79,10 @@
                 {% endif %}
                 {% if subdirectories %}
                 <a href="#directories" class="tab">Subdirectories</a>
+                <a href="?recurse=true" class="tab">Recurse</a>
+                {% endif %}
+                {% if recurse %}
+                <a href="?" class="tab">Unrecurse</a>
                 {% endif %}
                 {% if playlists %}
                 <a href="#playlists" class="tab">Playlists</a>
@@ -304,10 +112,8 @@
                             {% else %}
                             data-title="{{song.artist}} - {{song.title}}"
                             {% endif %}
-                            {% if song.cover %}
                             data-img="{{song.path}}/cover"
-                            {% endif %}
-                            onclick="playTrack(this)"
+                            onclick="AudioPlayer.activeSong = this"
                             >
                             <td></td>
                             <td>{{song.track}}</td>
@@ -339,7 +145,7 @@
                         {% for dir in subdirectories %}
                         <tr>
                             <td>
-                                <a href="{{dir.path}}/">
+                                <a href="/{{dir.path}}/">
                                     {{dir.name}}
                                 </a>
                             </td>
@@ -376,183 +182,13 @@
         </div>
 
         <!-- navigation -->
-        <script>
-            function switchTab() {
-                var hash = location.hash.substr(1);
-                var sections = document.getElementsByTagName("section");
-                for (var s of sections) {
-                    s.classList.remove("visible");
-                    if (s.id == hash) {
-                        s.classList.add("visible");
-                    }
-                }
-
-                var tabs = document.getElementsByClassName("tab");
-                for (var s of tabs) {
-                    s.classList.remove("active");
-                    if (s.attributes['href'] && s.attributes['href'].value == location.hash) {
-                        s.classList.add("active");
-                    }
-                }
-
-                if (!location.hash) {
-                    document.getElementsByTagName("section")[0].classList.add("visible");
-                    document.getElementsByClassName("tab")[0].classList.add("active");
-                }
-            }
-
-            window.addEventListener("hashchange", switchTab, false);
-
-            switchTab();
-        </script>
-
-        <!-- audio player -->
-        <script>
-            var songs = document.getElementsByClassName("song");
-            var shuffleList = [];
-            var player = document.getElementsByTagName("audio")[0];
-            var title = document.getElementById("title");
-            var cover = document.getElementsByClassName("cover");
-            player.addEventListener('ended', playNext);
-            var changeActiveSong = function(){
-                // only play once we know we can
-                for (var s of songs) {
-                   s.classList.remove("playing");
-                   if (player.getAttribute('data-url') == s.getAttribute('data-url')) {
-                     s.classList.add("playing");
-                   }
-                }
-                player.play();
-            };
-            player.addEventListener('canplaythrough', changeActiveSong);
-            player.addEventListener('canplay', changeActiveSong);
-
-            var controls = document.getElementById("controls");
-            var shuffle = controls.elements["shuffle"];
-            var repeat = controls.elements["repeat"];
-            var autoplay = controls.elements["autoplay"];
-
-            /**
-             * Disables all controls if autoplay is turned off
-             */
-            function toggleControls() {
-                shuffle.disabled = !autoplay.checked;
-                for (var r of repeat) {
-                    r.disabled = !autoplay.checked;
-                }
-            }
-
-            /**
-             * Resets the shuffle counter
-             */
-            function toggleShuffle() {
-                shuffleList = Array.prototype.slice.call(songs);
-            }
-
-            /**
-             * Get a song from the list that hasn't been played yet this cycle
-             * pops the song by index from the shuffle and returns a new one
-             */
-            function smartShuffle(index) {
-                shuffleList.pop(index);
-
-                if (shuffleList.length == 0 && repeat.value == "all") {
-                    toggleShuffle();
-                } else if (shuffleList.length > 0) {
-                    return shuffleList[Math.floor(Math.random() * shuffleList.length)];
-                }
-                return null;
-            }
-
-            /**
-             * Plays the next track.  Invoked when a song is over and autoplay is enabled
-             */
-            function playNext() {
-                if (player.src && autoplay.checked) {
-                    var activeSong = document.getElementsByClassName("song playing")[0];
-                    var active = Array.prototype.indexOf.call(songs, activeSong);
-                    var nextSong;
-                    if (repeat.value == "one") {
-                        nextSong = songs[active];
-                    }
-                    else if (!shuffle.checked) {
-                        var next = active + 1;
-                        if (repeat.value == "all") {
-                            next %= songs.length;
-                        }
-                        else if (next > songs.length) {
-                            return;
-                        }
-                        nextSong = songs[next];
-                    }
-                    else {
-                        nextSong = smartShuffle(active);
-                    }
-                    playTrack(nextSong);
-                }
-            }
-
-            /**
-             * Plays a track
-             */
-            function playTrack(song) {
-                if (song == null) {
-                    return;
-                }
-                player.pause();
-                //safely pause
-                setTimeout(function(){
-                  player.src = location.pathname + song.getAttribute('data-url');
-                  player.setAttribute('data-url', song.getAttribute('data-url'));
-                  cover[0].src = song.getAttribute('data-img');
-                  cover[1].src = song.getAttribute('data-img');
-        	      player.load();
-                }, 150);
-                title.innerHTML = song.getAttribute('data-title');
-            }
-        </script>
-
+        <script  src="/__static__/nav.js" type="text/javascript"></script>
+        <script  src="/__static__/player.js" type="text/javascript"></script>
         <!-- visualizer -->
+        <script src="/__static__/visualizer.js" type="text/javascript"></script>
         <script>
-            var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            var audioSrc = audioCtx.createMediaElementSource(player);
-            var analyser = audioCtx.createAnalyser();
-            analyser.fftSize = 128;
-
-            // Bind our analyser to the media element source.
-            audioSrc.connect(analyser);
-            audioSrc.connect(audioCtx.destination);
-
-            var frequencyData = new Uint8Array(analyser.frequencyBinCount);
-            var freqScale = 300;
-            var svgHeight = 200;
-            var svgWidth = 1200;
-            var barPadding = 1;
-
-            var svg = document.getElementById('visualizer');
-            var SVGNS = "http://www.w3.org/2000/svg";
-            // populate visualizer with bars
-            var bars = []
-            frequencyData.forEach(function(feq, i){
-                var bar = document.createElementNS(SVGNS, 'rect');
-                bar.setAttribute('x', i * (svgWidth / frequencyData.length));
-                bar.setAttribute('width', svgWidth / frequencyData.length - barPadding);
-                svg.appendChild(bar);
-                bars.push(bar);
-            });
-
-            // Render the visualizer at 60fps
-            var updateVisualizer = setInterval(function(){
-                // Copy frequency data
-                analyser.getByteFrequencyData(frequencyData);
-
-                // Update visualizer with new data.
-                frequencyData.forEach(function(feq, i){
-                var bar = bars[i];
-                bar.setAttribute('y', svgHeight - ((svgHeight / freqScale) * feq));
-                bar.setAttribute('height', (svgHeight / freqScale) * feq);
-                });
-            }, 1000/30.0);
+            var AudioPlayer = new FTMP3();
+            var vis = new Visualizer(AudioPlayer.player);
         </script>
     </body>
 </html>
