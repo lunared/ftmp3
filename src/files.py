@@ -13,30 +13,35 @@ from .song import get_info
 
 config = app.config
 order_by = lambda song: (song['album'], song.get('track', '0'), song['artist'], song['title'])
+"""
+sorting precedence of the playlist
+"""
+match_file = lambda f : config['FORMAT_MATCH'].search(f)
+"""
+Determine if a file matches what is acceptable for ftmp3 to display
+"""
 
-def get_dir_tree():
+def get_songs(path, recurse=False):
     """
-    When starting up the app, we make sure we cache the directory tree of all folders
-    that may be traversed by ftmp3.
+    Gets the song listing for a directory
+    Includes subdirectories as well.abort
+
+    :param path - the file path to list from
+    :param recurse - boolean indicating if we should recurse the tree for files
     """
-
-    tree = []
-    for path, dirs, files in os.walk(config['MUSIC_DIRECTORY']):
-        if len(fnmatch.filter(files, '*.mp3')) > 0:
-            if not path.endswith('/'):
-                path += '/'
-            tree.append(path[len(config['MUSIC_DIRECTORY']):])
-    return tree
-DIR_TREE = get_dir_tree()
-
-def get_songs(path):
     filepath = "{0}".format(config['MUSIC_DIRECTORY'])
     if path:
         filepath = os.path.join(config['MUSIC_DIRECTORY'], path)
-    files = filter(lambda f: config['FORMAT_MATCH'].search(f), os.listdir(filepath))
+
     songs = []
-    for f in files:
-        songs.append(get_info(filepath, f))
+    if recurse:
+        for root, subdirs, files in os.walk(filepath):
+            for f in filter(match_file, files):
+                songs.append(get_info(root, f))
+    else:
+        files = filter(match_file, os.listdir(filepath))
+        for f in files:
+            songs.append(get_info(filepath, f))
 
     return {
         'songs': sorted(songs, key=order_by),
@@ -44,7 +49,7 @@ def get_songs(path):
             'path': os.path.join(filepath, dir)[len(config['MUSIC_DIRECTORY']):],
             'name': os.path.basename(dir),
             'songs': len(list(filter(
-                lambda x: config['FORMAT_MATCH'].search(x),
+                match_file,
                 os.listdir(os.path.join(filepath, dir))
             ))),
             'directories': len(
@@ -62,7 +67,8 @@ def get_songs(path):
         } for dir in list(filter(
             lambda f: os.path.isdir(os.path.join(filepath, f)),
             os.listdir(filepath)
-        ))],
+        ))] if not recurse else None,
+        'recurse': recurse,
         'playlists': list(filter(lambda f: f.endswith("m3u"), os.listdir(filepath))),
         'path': path,
         'parent': os.path.join(filepath, os.pardir)[len(config['MUSIC_DIRECTORY']):]+"/"

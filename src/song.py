@@ -11,6 +11,9 @@ import io
 import base64
 import fnmatch
 from urllib.request import pathname2url
+from pathlib import Path
+
+config = app.config
 
 def read_cover_image(id3, key):
     """
@@ -53,7 +56,7 @@ def get_cover(songpath):
             """
             Recursively search parent directories for a cover.jpg
             """
-            if i > app.config['COVER_IMG_RECURSION_LIMIT']:
+            if i > config['COVER_IMG_RECURSION_LIMIT']:
                 return None
 
             for file in os.listdir(path):
@@ -68,10 +71,10 @@ def get_info(filepath, songfile):
     """
     Get the song's metadata for display on the page
     """
-    songpath = os.path.join(filepath, songfile)
-    url = pathname2url(songfile)
+    songpath = Path(filepath, songfile)
+    url = "/"+pathname2url(songpath.relative_to(config['MUSIC_DIRECTORY']).as_posix())
     try:
-        song = MP3(songpath)
+        song = MP3(songpath.as_posix())
     except HeaderNotFoundError:
         print("mutagen.mp3.HeaderNotFoundError for {}".format(songpath))
         song = None
@@ -84,8 +87,6 @@ def get_info(filepath, songfile):
             'length':"{0}:{1:02d}".format(int(song.info.length//60), int(song.info.length%60)),
             'path': url,
         }
-        if song.tags.get('cover'):
-            info['cover'] = True
     else:
         info = {
             'title': songfile,

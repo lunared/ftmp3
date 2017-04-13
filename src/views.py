@@ -27,7 +27,7 @@ def stream(path):
 def home(path=None):
     if path and not os.path.exists(os.path.join(app.config['MUSIC_DIRECTORY'], path)):
         return abort(404)
-    context = get_songs(path)
+    context = get_songs(path, recurse=request.args.get('recurse', False))
     return render_template("body.html", **context), 200
 
 
