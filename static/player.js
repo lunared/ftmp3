@@ -1,10 +1,13 @@
 class FTMP3 {
     constructor() {
-        this._shuffleList = Array.prototype.map.call(this._songElements, function() { return false });;
+        this._shuffleList = Array.prototype.map.call(this._songElements, function() { return false });
         var me = this;
         this.player.addEventListener('ended', function(){ me.next() });
         this.player.addEventListener('loadeddata', function(){ me._activateSong() });
         this.player.addEventListener('canplaythrough', this.player.play);
+        this.player.addEventListener('timeupdate', function() { me._updateProgress() });
+        this._playingIndex = -1;
+        this._shuffleIndex = -1;
     }
 
     /// properties
@@ -49,15 +52,27 @@ class FTMP3 {
         var self = this;
         var player = this.player;
         // update the shuffle list
-        if (index instanceof HTMLElement) {
-            var song = index;
-            this.reshuffle();
-            index = Array.prototype.indexOf.call(this._songElements, index);
-            this._shuffleList[index] = true;
+        if (this.shuffle) {
+            if (index instanceof HTMLElement) {
+                var song = index;
+                this.reshuffle(false);
+                index = Array.prototype.indexOf.call(this._shuffleList, index);
+                this._shuffleList.pop(index);
+                this._shuffleIndex = 0;
+            } else {
+                var song = this._shuffleList[index];
+                this._shuffleIndex = index;
+            }
         } else {
-            var song = this._songElements[index];
-            this._shuffleList[index] = true;
+            if (index instanceof HTMLElement) {
+                var song = index;
+                this._index = Array.prototype.indexOf.call(this._songElements, index);
+            } else {
+                var song = this._songElements[index];
+                this._index = index;
+            }
         }
+        
         //safely pause and load the new song
         setTimeout(function(){
             player.src = song.getAttribute('data-url');
@@ -67,19 +82,6 @@ class FTMP3 {
         }, 150);
         // update the title on the interface
         this.title = song.getAttribute('data-title');
-    }
-
-    /**
-     * Get a list of song indexes that haven't been played yet in the shuffle
-     */
-    get _notPlayed() {
-        var notPlayed = [];
-        for (var s in this._shuffleList) {
-            if (!this._shuffleList[s]) {
-                notPlayed.push(s);
-            }
-        }
-        return notPlayed;
     }
 
     ///// CONTROLS 
@@ -104,67 +106,53 @@ class FTMP3 {
         return this._shuffleElement.checked;
     }
 
-    get autoplay() {
-        return this._controls['autoplay'].checked;
-    }
-
     /**
-     * Disables all controls if autoplay is turned off
+     * Shuffles array in place.
      */
-    toggleControls() {
-        this._shuffleElement.disabled = !this.autoplay;
-        for (var r of this._repeatElement) {
-            r.disabled = !this.autoplay;
+    reshuffle(inplace=true) {
+        let a = Array.prototype.map.call(this._songElements, function(value) { return value });
+        for (let i = a.length; i; i--) {
+            let j = Math.floor(Math.random() * i);
+            [a[i - 1], a[j]] = [a[j], a[i - 1]];
+        }
+        this._shuffleList = a;
+
+        if (inplace) {
+            let index = Array.prototype.indexOf.call(this._shuffleList, this.activeSong);
+            this._shuffleList.pop(index);
+            this._shuffleIndex = 0;
         }
     }
 
     /**
-     * Marks all songs as playable again in the smart shuffle
+     * Plays the next track.
      */
-    reshuffle() {
-        this._shuffleList.fill(false);
-    }
-
-    /**
-     * Get a song from the list that hasn't been played yet this cycle
-     * pops the song by index from the shuffle and returns a new one
-     */
-    _smartShuffle(index) {
-        var available = this._notPlayed;
-        if (available.length == 0 && this.repeatMode == "all") {
-            this.reshuffle();
-            available = this._notPlayed;
-        }
-        if (available.length > 0) {
-            return available[Math.floor(Math.random() * available.length)];
-        }
-        return null;
-    }
-
-    /**
-     * Plays the next track.  Invoked when a song is over and autoplay is enabled
-     */
-    next() {
-        if (this.player.src && this.autoplay) {
-            var active = Array.prototype.indexOf.call(this._songElements, this.activeSong);
-            var nextSong;
+    next(manual=false) {
+        if (this.player.src) {
+            var next;
             if (this.repeatMode == "one") {
                 this.player.play();
+                return;
             }
-            else if (!this.shuffle) {
-                var next = active + 1;
-                if (this.repeatMode == "all") {
-                    next %= this._songElements.length;
-                }
-                else if (next > this._songElements.length) {
-                    return;
-                }
-                nextSong = next;
+            
+            if (!this.shuffle) {
+                next = this._index + 1;
             }
             else {
-                nextSong = this._smartShuffle(active);
+                next = this._shuffleIndex + 1;
             }
-            this.activeSong = nextSong;
+            
+            if (this.repeatMode == "all") {
+                if (this.shuffle && next >= this._songElements.length) {
+                    this.reshuffle(false);
+                }
+                next %= this._songElements.length;
+            }
+            else if (next > this._songElements.length) {
+                return;
+            }
+            
+            this.activeSong = next;
         }
     }
 
@@ -177,4 +165,44 @@ class FTMP3 {
             }
         }
     };
+
+    /**
+     * Toggles play and pause of the current song
+     */
+    play() {
+        if (this.player.src) {
+            if (!this.player.paused) {
+                this.player.pause();
+            } else {
+                this.player.play();
+            }
+        }
+    }
+
+    /**
+     * Seeks to a specified percentage into the song
+     */
+    skip(progress) {
+        if (this.player.src) {
+            this.player.currentTime = this.player.duration * progress;
+            this.player.play();
+        }
+    }
+
+    _updateProgress() {
+        let progress = this.player.currentTime / this.player.duration;
+
+        let es = document.getElementById("Progress").querySelectorAll('.meter');
+        for (let i = 0, n = 0; i < es.length; i++, n = i / es.length) {
+            if (progress > n) {
+                es[i].classList.add('at');
+            } else {
+                es[i].classList.remove('at');
+            }
+        }
+
+        document.getElementById("Playback").querySelector('label[name="time"]').textContent = 
+            String("00" + Math.trunc(this.player.currentTime / 60)).slice(-2) + ":" +
+            String("00" + Math.trunc(this.player.currentTime % 60)).slice(-2);
+    }
 }
