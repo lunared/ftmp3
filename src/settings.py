@@ -15,3 +15,4 @@ FORMAT_MATCH = re.compile(r"(?i)\.(mp3|m4a|ogg)$")
 # number of directories upwards to limit recursive check for cover image
 COVER_IMG_RECURSION_LIMIT = 1
 
+DEBUG = True
