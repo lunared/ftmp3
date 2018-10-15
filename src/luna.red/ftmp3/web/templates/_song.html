@@ -1,0 +1,24 @@
+<tr class="song"
+    data-url="/{{.Filename}}/stream"
+    {{if .Track}}
+    data-title="{{.Track}}. {{.Artist}} - {{.Title}}"
+    {{else if .Artist}}
+    data-title="{{.Artist}} - {{.Title}}"
+    {{else}}
+    data-title="{{.Title}}"
+    {{end}}
+    data-img="/{{.Filename}}/cover"
+    onclick="AudioPlayer.activeSong = this"
+    >
+    <td></td>
+    <td>{{.Track}}</td>
+    <td class="hide-on-small">{{.Artist}}</td>
+    <td>{{.Title}}</td>
+    <td class="hide-on-small">{{.Album}}</td>
+    <td class="right">{{.Duration}}</td>
+    <td class="center">
+        <a href="/{{.Filename}}" target="_blank" onclick="event.stopPropagation()">
+            <img src="/__static__/save.png" width="16" height="16">
+        </a>
+    </td>
+</tr>

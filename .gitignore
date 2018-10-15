@@ -1,6 +1,17 @@
 music/*
-.pyc
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
 
-virtual/
+# Test binary, build with `go test -c`
+*.test
 
-__pycache__/
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+bin/
+pkg/
+**/debug

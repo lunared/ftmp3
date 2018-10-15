@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>FTMP3 - {{.Path}}</title>
+        <meta name=viewport content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="/__static__/style.css">
+    </head>
+    <body>
+        <div class="container">
+            {{template "_player.html" .}}
+
+            <nav>
+                {{ if .Songs }}
+                <a href="#songs" class="tab">Songs ({{len .Songs}})</a>
+                {{ end }}
+                {{ if .Subdirectories }}
+                <a href="#directories" class="tab">Subdirectories</a>
+                <a href="?recurse=true" class="tab">Recurse</a>
+                {{ end }}
+                {{ if .Recurse }}
+                <a href="?" class="tab">Unrecurse</a>
+                {{ end }}
+                {{ if .Playlists }}
+                <a href="#playlists" class="tab">Playlists</a>
+                {{ end }}
+                <span class="tab">&nbsp;</span>
+                {{ if .Parent }}
+                <a href="/{{.Parent}}" class="tab pull-right">..</a>
+                {{ end }}
+            </nav>
+            {{ if .Songs }}
+            <section id="songs">
+                <table class="table">
+                    <thead>
+                        <th width="30"></th>
+                        <th width="40">Track</th>
+                        <th class="hide-on-small" width="170">Artist</th>
+                        <th>Title</th>
+                        <th class="hide-on-small">Album</th>
+                        <th width="50">Length</th>
+                        <th class="hide-on-small" width="40">Save</th>
+                    </thead>
+                    <tbody>
+                        {{ range .Songs }}
+                            {{template "_song.html" .}}
+                        {{ end }}
+                    </tbody>
+                </table>
+            </section>
+            {{ end }}
+            {{ if .Subdirectories }}
+            <section id="directories">
+                <table class="table">
+                    <thead>
+                        <th>Path</th>
+                        <th width="70">Songs</th>
+                        <th width="70">Folders</th>
+                        <th width="70">Playlists</th>
+                    </thead>    
+                    <tbody>
+                        {{ range .Subdirectories }}
+                        {{template "_subdirectory.html" .}}
+                        {{ end }}
+                    </tbody>
+                </table>
+            </section>
+            {{ end }}
+            {{ if .Playlists }}
+            <section id="playlists">
+                <table class="table">
+                    <thead>
+                        <th>Path</th>
+                        <th width="70">Songs</th>
+                        <th width="90">Duration</th>
+                    </thead>    
+                    <tbody>
+                        {{ range .Playlists }}
+                        <tr>
+                            <td>{{ . }}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </section>
+            {{ end }}
+            <h6 class="footer"><a href="https://github.com/nhydock/ftmp3">Powered by ftmp3</a></h6>
+        </div>
+
+        <!-- navigation -->
+        <script  src="/__static__/nav.js" type="text/javascript"></script>
+        <script  src="/__static__/player.js" type="text/javascript"></script>
+        <!-- visualizer -->
+        <script src="/__static__/visualizer.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            var AudioPlayer = new FTMP3();
+            var vis = new Visualizer(AudioPlayer.player);
+        </script>
+    </body>
+</html>
